@@ -1,13 +1,36 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import AppLayout from "@/components/layout/AppLayout";
+import PdfViewerPanel from "@/components/home/PdfViewerPanel";
+import DataEntryPanel from "@/components/home/DataEntryPanel";
+import { ChevronRight } from "lucide-react";
 
 const Index = () => {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <AppLayout>
+      <div className="flex h-full">
+        {/* Left - PDF Viewer */}
+        <div className="w-1/2 h-full">
+          <PdfViewerPanel />
+        </div>
+
+        {/* Center toggle */}
+        <div className="flex items-center justify-center w-6 bg-muted border-x border-border cursor-pointer hover:bg-accent transition-colors">
+          <ChevronRight className="w-4 h-4 text-muted-foreground" />
+        </div>
+
+        {/* Right - Data Entry */}
+        <div className="flex-1 h-full flex">
+          <div className="flex-1">
+            <DataEntryPanel />
+          </div>
+          {/* Right scroll bar label */}
+          <div className="w-6 bg-muted flex items-center justify-center border-l border-border">
+            <span className="text-xs text-muted-foreground [writing-mode:vertical-rl] rotate-180">
+              Scroll bar
+            </span>
+          </div>
+        </div>
       </div>
-    </div>
+    </AppLayout>
   );
 };
 

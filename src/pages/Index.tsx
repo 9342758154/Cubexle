@@ -22,12 +22,7 @@ const Index = () => {
           <div className="flex-1">
             <DataEntryPanel />
           </div>
-          {/* Right scroll bar label */}
-          <div className="w-6 bg-muted flex items-center justify-center border-l border-border">
-            <span className="text-xs text-muted-foreground [writing-mode:vertical-rl] rotate-180">
-              Scroll bar
-            </span>
-          </div>
+          
         </div>
       </div>
     </AppLayout>

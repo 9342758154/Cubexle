@@ -18,7 +18,7 @@ const TopNavbar = () => {
       <div className="flex items-center justify-between px-4 py-2">
         {/* Logo */}
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded border border-border/30 bg-card/10 flex items-center justify-center">
+          <div className="w-16 h-16 rounded border border-border/30 bg-card/10 flex items-center justify-center">
             <span className="text-xs text-nav-foreground/70">□</span>
           </div>
           <span className="text-xl font-semibold tracking-wide">Logo</span>
@@ -43,7 +43,7 @@ const TopNavbar = () => {
 
         {/* Right actions */}
         <div className="flex items-center gap-3">
-          <button className="relative p-1.5 hover:bg-nav-foreground/10 rounded transition-colors">
+          <button className="relative p-1 hover:bg-nav-foreground/10 rounded transition-colors">
             <Bell className="w-5 h-5 text-warning" />
           </button>
           <button
@@ -59,7 +59,7 @@ const TopNavbar = () => {
       {/* Welcome bar */}
       <div className="flex items-center justify-between px-4 pb-2">
         <div />
-        <div className="bg-card/10 border border-border/20 rounded px-8 py-1 text-sm">
+        <div className="bg-card/10 border border-border/20 rounded px-32 py-1 text-sm">
           Welcome User Name
         </div>
         <button className="p-1.5 hover:bg-nav-foreground/10 rounded transition-colors">

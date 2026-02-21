@@ -8,7 +8,6 @@ import SearchPage from "./pages/SearchPage";
 import AdminPage from "./pages/AdminPage";
 import ReportPage from "./pages/ReportPage";
 import NotFound from "./pages/NotFound";
-
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -23,6 +22,8 @@ const App = () => (
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/report" element={<ReportPage />} />
           <Route path="*" element={<NotFound />} />
+         
+
         </Routes>
       </BrowserRouter>
     </TooltipProvider>

@@ -1,6 +1,6 @@
+// src/pages/AdminPage.tsx
 import AppLayout from "@/components/layout/AppLayout";
 import { Users, Settings, Shield, Database, ChevronRight } from "lucide-react";
-
 
 const adminSections = [
   {

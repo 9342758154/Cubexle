@@ -1,22 +1,15 @@
+// src/components/TopNavbar.tsx (or wherever it is)
 import { Bell, LogOut, Settings, Home, Search, FileText, User, ChevronDown, Menu, X, Activity, Microscope, HeartPulse, Stethoscope, Calendar } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 
-const navItems = [
-  { label: "Home", path: "/", icon: Home },
-  { label: "Search", path: "/search", icon: Search },
-  { label: "Admin", path: "/admin", icon: Settings },
-  { label: "Report", path: "/report", icon: FileText },
-];
+// Define the props interface
+interface TopNavbarProps {
+  onPanelChange?: (panel: string) => void;
+  activePanel?: string;
+}
 
-const medicalNavItems = [
-  { label: "OV", path: "/ov", icon: Stethoscope, color: "text-blue-400" },
-  { label: "Diagnostics", path: "/diagnostics", icon: Activity, color: "text-green-400" },
-  { label: "Labs", path: "/labs", icon: Microscope, color: "text-purple-400" },
-  { label: "EKG", path: "/ekg", icon: HeartPulse, color: "text-red-400" },
-];
-
-const TopNavbar = () => {
+const TopNavbar = ({ onPanelChange, activePanel }: TopNavbarProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -76,8 +69,29 @@ const TopNavbar = () => {
     setShowCalendar(false);
   };
 
+  // Handle medical nav click
+  const handleMedicalNavClick = (path: string, panelId: string) => {
+    if (onPanelChange) {
+      onPanelChange(panelId);
+    }
+  };
+
   const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   const weekDays = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+
+  const navItems = [
+    { label: "Home", path: "/", icon: Home },
+    { label: "Search", path: "/search", icon: Search },
+    { label: "Admin", path: "/admin", icon: Settings },
+    { label: "Report", path: "/report", icon: FileText },
+  ];
+
+  const medicalNavItems = [
+    { label: "OV", path: "/ov", icon: Stethoscope, color: "text-blue-400", panelId: "ov" },
+    { label: "Diagnostics", path: "/diagnostics", icon: Activity, color: "text-green-400", panelId: "diagnostics" },
+    { label: "Labs", path: "/labs", icon: Microscope, color: "text-purple-400", panelId: "labs" },
+    { label: "EKG", path: "/ekg", icon: HeartPulse, color: "text-red-400", panelId: "ekg" },
+  ];
 
   return (
     <div className={`sticky top-0 z-50 w-full transition-all duration-300 ${
@@ -159,21 +173,18 @@ const TopNavbar = () => {
         </div>
       </div>
 
-      {/* Medical Navigation - Moved to Right Side */}
+      {/* Medical Navigation */}
       <div className="border-t border-white/10">
         <div className="flex justify-between items-center px-8 sm:px-8 lg:px-32 py-1">
-          {/* Empty div for spacing */}
           <div className="w-0"></div>
-          
-          {/* Medical Nav Items - Now on Right Side */}
           <div className="flex items-center gap-4 sm:gap-16 ml-auto">
             {medicalNavItems.map((item) => {
               const Icon = item.icon;
-              const isActive = location.pathname === item.path;
+              const isActive = activePanel === item.panelId;
               return (
                 <button
                   key={item.path}
-                  onClick={() => navigate(item.path)}
+                  onClick={() => handleMedicalNavClick(item.path, item.panelId)}
                   className={`px-4 py-2 rounded-lg transition-all duration-300 flex items-center gap-2 ${
                     isActive
                       ? 'bg-white/20 text-white'
@@ -189,11 +200,11 @@ const TopNavbar = () => {
         </div>
       </div>
 
-      {/* Document Search Bar - Resized and Moved Left */}
+      {/* Document Search Bar */}
       <div className="border-t border-white/10 bg-black/20 backdrop-blur-sm">
         <div className="px-2 sm:px-6 lg:px-3 py-1">
           <div className="flex items-center gap-2">
-            {/* Document Name/No - 350px Fixed Width */}
+            {/* Document Name/No */}
             <div className="w-[350px]">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/40" />
@@ -320,9 +331,9 @@ const TopNavbar = () => {
             </div>
 
             {/* Status Dropdown */}
-            <div className="relative w-28">
+            <div className="relative w-32">
               <select className="w-full px-3 py-2.5 bg-white/10 border border-white/20 rounded-lg text-white appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-400/50 text-sm">
-                <option value="" className="bg-slate-800 text-white">Status</option>
+                <option value="" className="bg-slate-800 text-white">Clarification</option>
                 <option value="active" className="bg-slate-800 text-white">Active</option>
                 <option value="pending" className="bg-slate-800 text-white">Pending</option>
                 <option value="completed" className="bg-slate-800 text-white">Completed</option>
@@ -386,12 +397,12 @@ const TopNavbar = () => {
               <div className="text-xs font-semibold text-gray-400 uppercase px-3">Medical</div>
               {medicalNavItems.map((item) => {
                 const Icon = item.icon;
-                const isActive = location.pathname === item.path;
+                const isActive = activePanel === item.panelId;
                 return (
                   <button
                     key={item.path}
                     onClick={() => {
-                      navigate(item.path);
+                      handleMedicalNavClick(item.path, item.panelId);
                       setIsMobileMenuOpen(false);
                     }}
                     className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-all ${

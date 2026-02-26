@@ -25,7 +25,7 @@ interface LabResultRow {
   parameter: string;
   value: string;
   unit: string;
-  flag: "High" | "Normal" | "Low" | "";
+  flag: "High" | "Normal" | "Low" | "No Ref Range" | "";
   referenceRange: string;
 }
 
@@ -76,7 +76,7 @@ const AutoResizeTextarea = ({
       textareaRef.current.style.height = "inherit";
       textareaRef.current.style.height = `${Math.max(
         textareaRef.current.scrollHeight,
-        150 // Min height matches image frame better
+        150
       )}px`;
     }
   }, [value]);
@@ -128,6 +128,8 @@ export default function LaboratoryReport() {
   // --- Effects ---
   useEffect(() => {
     setAvailableParams(PANELS_DATA[panelName] || []);
+    // Clear results when panel changes to avoid mismatched parameters
+    setResults([]);
   }, [panelName]);
 
   /* HANDLERS */
@@ -157,6 +159,38 @@ export default function LaboratoryReport() {
         );
       }
     });
+  };
+
+  const handleSelectAll = () => {
+    const allSelected = availableParams.every(param => 
+      results.some(r => r.parameter === param)
+    );
+
+    if (allSelected) {
+      // Deselect all
+      setResults([]);
+    } else {
+      // Select all parameters that aren't already selected
+      const newResults = [...results];
+      availableParams.forEach(param => {
+        const exists = results.some(r => r.parameter === param);
+        if (!exists) {
+          newResults.push({
+            id: param,
+            parameter: param,
+            value: "",
+            unit: "",
+            flag: "",
+            referenceRange: "",
+          });
+        }
+      });
+      // Sort to maintain panel order
+      newResults.sort((a, b) => 
+        availableParams.indexOf(a.parameter) - availableParams.indexOf(b.parameter)
+      );
+      setResults(newResults);
+    }
   };
 
   const updateResultRow = (
@@ -202,10 +236,14 @@ export default function LaboratoryReport() {
     alert("Report Saved Successfully!");
   };
 
+  // Check if all parameters are selected
+  const allParametersSelected = availableParams.length > 0 && 
+    availableParams.every(param => results.some(r => r.parameter === param));
+
   // --- Styles ---
   const inputClass =
     "w-full h-8 bg-[#CFE8F2] rounded px-3 text-sm text-gray-700 outline-none focus:ring-1 focus:ring-blue-400 border-none placeholder-gray-400 transition-all";
-  const labelClass = "block text-xs font-bold text-[#1e3a8a] mb-1.5";
+  const labelClass = "block text-xs font-bold text-[#000000] mb-1.5";
 
   return (
     <div className="min-h-screen bg-white pb-24 font-sans text-gray-800">
@@ -260,7 +298,6 @@ export default function LaboratoryReport() {
         
         {/* 2. Title Header */}
         <div className="border border-gray-300 rounded-lg p-1 bg-white flex items-center gap-2 shadow-sm">
-          
           <h1 className="text-lg font-bold text-black pl-4">Laboratory Report</h1>
         </div>
         
@@ -270,7 +307,7 @@ export default function LaboratoryReport() {
             <div className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center">
               <User size={14} className="text-blue-600" />
             </div>
-            <h2 className="text-sm font-bold text-[#1e3a8a]">Patient information</h2>
+            <h2 className="text-sm font-bold text-[#000000]">Patient information</h2>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
@@ -329,11 +366,11 @@ export default function LaboratoryReport() {
           </div>
         </div>
 
-        {/* 5. Panel Selection & Parameters */}
+        {/* 5. Panel Selection & Parameters with Select All Button */}
         <div className="bg-white border border-blue-300 rounded-xl p-6 shadow-sm mb-2">
-          <div className="flex flex-col md:flex-row gap-8 ">
+          <div className="flex flex-col md:flex-row gap-8">
             {/* Panel Select */}
-            <div className="flex-1 mb-2 ">
+            <div className="flex-1 mb-2">
               <label className={labelClass}>Panel Name</label>
               <div className="relative py-1.5">
                 <select 
@@ -347,9 +384,21 @@ export default function LaboratoryReport() {
               </div>
             </div>
 
-            {/* Parameters List */}
+            {/* Parameters List with Select All */}
             <div className="flex-[1.5]">
-              <label className="block text-sm font-semibold text-[#1e3a8a] mb-2">Select Parameters</label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-semibold text-[#030303]">Select Parameters</label>
+                <button
+                  onClick={handleSelectAll}
+                  className={`text-xs font-medium px-3 py-1.5 rounded-md transition-colors ${
+                    allParametersSelected 
+                      ? 'bg-amber-100 text-amber-700 hover:bg-amber-200 border border-amber-300' 
+                      : 'bg-blue-100 text-blue-700 hover:bg-blue-200 border border-blue-300'
+                  }`}
+                >
+                  {allParametersSelected ? 'Deselect All' : 'Select All'}
+                </button>
+              </div>
               <div className="bg-[#bae6fd] bg-opacity-40 rounded-lg p-5">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {availableParams.map((param) => {
@@ -364,6 +413,13 @@ export default function LaboratoryReport() {
                     );
                   })}
                 </div>
+                
+                {/* Selection Summary */}
+                {availableParams.length > 0 && (
+                  <div className="mt-3 text-xs text-gray-600 border-t border-blue-200 pt-2">
+                    {results.length} of {availableParams.length} parameters selected
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -372,11 +428,11 @@ export default function LaboratoryReport() {
         {/* 6. Lab Results Table */}
         <div className="bg-white border border-blue-300 rounded-xl p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-bold text-[#1e3a8a]">Lab Results</h2>
+            <h2 className="text-sm font-bold text-[#020202]">Lab Results</h2>
             <div className="flex gap-4 text-xs font-medium text-gray-500">
-              <span>High</span>
-              <span>Normal</span>
-              <span>Low</span>
+              <span className="text-red-600">High</span>
+              <span className="text-green-600">Normal</span>
+              <span className="text-blue-600">Low</span>
             </div>
           </div>
 
@@ -427,13 +483,16 @@ export default function LaboratoryReport() {
                                 w-full h-8 px-2 text-xs font-bold rounded border outline-none appearance-none cursor-pointer
                                 ${row.flag === 'High' ? 'bg-red-50 text-red-600 border-red-200' : 
                                   row.flag === 'Low' ? 'bg-blue-50 text-blue-600 border-blue-200' :
-                                  row.flag === 'Normal' ? 'bg-green-50 text-green-600 border-green-200' : 'bg-white text-gray-600 border-gray-300'}
+                                  row.flag === 'Normal' ? 'bg-green-50 text-green-600 border-green-200' : 
+                                  row.flag === 'No Ref Range' ? 'bg-gray-50 text-gray-600 border-gray-200' :
+                                  'bg-white text-gray-600 border-gray-300'}
                               `}
                             >
                               <option value="">Select</option>
                               <option value="Normal">Normal</option>
                               <option value="High">High</option>
                               <option value="Low">Low</option>
+                              <option value="No Ref Range">No Ref Range</option>
                             </select>
                             <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
                                 {row.flag === 'High' && <ArrowUp size={12} className="text-red-600" />}
@@ -453,6 +512,7 @@ export default function LaboratoryReport() {
                          <button 
                             onClick={() => handleParameterToggle(row.parameter)}
                             className="p-1.5 text-gray-400 hover:text-red-500 transition-colors"
+                            title="Remove parameter"
                          >
                             <Trash2 size={16} />
                          </button>
@@ -462,12 +522,19 @@ export default function LaboratoryReport() {
                 )}
               </tbody>
             </table>
+            
+            {/* Results Summary */}
+            {results.length > 0 && (
+              <div className="mt-4 text-xs text-gray-500 text-right border-t border-gray-200 pt-2">
+                Showing {results.length} of {availableParams.length} parameters
+              </div>
+            )}
           </div>
         </div>
 
         {/* 7. Doctor's Comments & Footer Section */}
         <div className="bg-white border border-blue-300 rounded-xl p-6 shadow-sm mb-10">
-          <h2 className="text-sm font-bold text-[#1e3a8a] mb-2">Doctor's Comments & Observations</h2>
+          <h2 className="text-sm font-bold text-[#000000] mb-2">Doctor's Comments & Observations</h2>
           
           <div className="bg-[#fcfdfd] border border-gray-300 rounded-lg p-0 mb-4 overflow-hidden">
             <AutoResizeTextarea
@@ -497,7 +564,7 @@ export default function LaboratoryReport() {
           </div>
         </div>
         
-        {/* 8. Integrated Footer Action Buttons (Right-aligned below comments box as per frame) */}
+        {/* 8. Integrated Footer Action Buttons */}
         <div className="flex justify-end gap-3 mt-4 mb-8">
             <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-50 transition-colors shadow-sm">
               <X size={14} /> Cancel
